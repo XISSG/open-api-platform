@@ -6,7 +6,7 @@ import (
 )
 
 // 创建接口信息
-func (s *Service) CreateUser(values ...*model.User) error {
+func (s *Mysql) CreateUser(values ...*model.User) error {
 	tx := s.query.Begin()
 	err := tx.User.Create(values...)
 	if err != nil {
@@ -17,7 +17,17 @@ func (s *Service) CreateUser(values ...*model.User) error {
 	return nil
 }
 
-func (s *Service) GetUserById(id int64) (*model.User, error) {
+func (s *Mysql) GetUserByName(name string) (*model.User, error) {
+	cond := s.query.User.UserName.Eq(name)
+	alive := s.query.User.IsDelete.Eq(Normal)
+	result, err := s.query.User.Where(cond, alive).First()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s *Mysql) GetUserById(id int64) (*model.User, error) {
 	cond := s.query.User.ID.Eq(id)
 	alive := s.query.User.IsDelete.Eq(Normal)
 	result, err := s.query.User.Where(cond, alive).First()
@@ -27,8 +37,18 @@ func (s *Service) GetUserById(id int64) (*model.User, error) {
 	return result, nil
 }
 
+func (s *Mysql) GetUserByAccessKey(accessKey string) (*model.User, error) {
+	cond := s.query.User.AccessKey.Eq(accessKey)
+	alive := s.query.User.IsDelete.Eq(Normal)
+	result, err := s.query.User.Where(cond, alive).First()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // 分页查询
-func (s *Service) GetUserList(ctx models.QueryUserRequest) ([]*model.User, error) {
+func (s *Mysql) GetUserList(ctx models.QueryUserRequest) ([]*model.User, error) {
 	offset := (ctx.Page - 1) * ctx.PageSize
 	orderBy := s.query.User.ID
 	alive := s.query.User.IsDelete.Eq(Normal)
@@ -39,7 +59,7 @@ func (s *Service) GetUserList(ctx models.QueryUserRequest) ([]*model.User, error
 	return results, nil
 }
 
-func (s *Service) UpdateUser(ctx models.UpdateUserRequest) error {
+func (s *Mysql) UpdateUser(ctx models.UpdateUserRequest) error {
 	cond := s.query.User.ID.Eq(ctx.ID)
 	alive := s.query.User.IsDelete.Eq(Normal)
 	tx := s.query.Begin()
@@ -53,7 +73,7 @@ func (s *Service) UpdateUser(ctx models.UpdateUserRequest) error {
 	return nil
 }
 
-func (s *Service) DeleteUser(id int64) error {
+func (s *Mysql) DeleteUser(id int64) error {
 	cond := s.query.User.ID.Eq(id)
 	alive := s.query.User.IsDelete.Eq(Normal)
 	update := s.query.User.IsDelete
@@ -65,4 +85,17 @@ func (s *Service) DeleteUser(id int64) error {
 	}
 	_ = tx.Commit()
 	return nil
+}
+
+func (s *Mysql) IsUserExist(name string) bool {
+	user, err := s.GetUserByName(name)
+	if err != nil {
+		return false
+	}
+
+	if user != nil {
+		return true
+	}
+
+	return false
 }

@@ -35,6 +35,8 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.UpdateTime = field.NewTime(tableName, "update_time")
 	_user.IsDelete = field.NewInt32(tableName, "is_delete")
 	_user.UserRole = field.NewString(tableName, "user_role")
+	_user.AccessKey = field.NewString(tableName, "accessKey")
+	_user.SecretKey = field.NewString(tableName, "secretKey")
 
 	_user.fillFieldMap()
 
@@ -53,6 +55,8 @@ type user struct {
 	UpdateTime   field.Time   // 更新时间
 	IsDelete     field.Int32  // 是否删除,0为不删除，1为删除
 	UserRole     field.String // 用户类型，有user,admin,ban
+	AccessKey    field.String // 本平台的accessKey
+	SecretKey    field.String // 本平台的secretKey
 
 	fieldMap map[string]field.Expr
 }
@@ -77,6 +81,8 @@ func (u *user) updateTableName(table string) *user {
 	u.UpdateTime = field.NewTime(table, "update_time")
 	u.IsDelete = field.NewInt32(table, "is_delete")
 	u.UserRole = field.NewString(table, "user_role")
+	u.AccessKey = field.NewString(table, "accessKey")
+	u.SecretKey = field.NewString(table, "secretKey")
 
 	u.fillFieldMap()
 
@@ -93,7 +99,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 8)
+	u.fieldMap = make(map[string]field.Expr, 10)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["user_name"] = u.UserName
 	u.fieldMap["avatar_url"] = u.AvatarURL
@@ -102,6 +108,8 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["update_time"] = u.UpdateTime
 	u.fieldMap["is_delete"] = u.IsDelete
 	u.fieldMap["user_role"] = u.UserRole
+	u.fieldMap["accessKey"] = u.AccessKey
+	u.fieldMap["secretKey"] = u.SecretKey
 }
 
 func (u user) clone(db *gorm.DB) user {

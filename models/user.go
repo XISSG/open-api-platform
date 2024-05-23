@@ -15,6 +15,8 @@ type AddUserRequest struct {
 
 func AddUserRequestToUser(addRequest AddUserRequest) model.User {
 	id := utils.Snowflake()
+	accessKey, _ := utils.AccessKeyGenerator()
+	secretKey, _ := utils.SecretKeyGenerator()
 	return model.User{
 		ID:           id,
 		UserName:     addRequest.UserName,
@@ -22,6 +24,8 @@ func AddUserRequestToUser(addRequest AddUserRequest) model.User {
 		UserPassword: addRequest.UserPassword,
 		CreateTime:   time.Now().UTC(),
 		UserRole:     constant.User,
+		AccessKey:    accessKey,
+		SecretKey:    secretKey,
 	}
 }
 
@@ -47,6 +51,8 @@ type UserResponse struct {
 	UserName  string `json:"user_name"`
 	AvatarURL string `json:"avatar_url"`
 	UserRole  string `json:"user_role"`
+	AccessKey string `json:"access_key"`
+	SecretKey string `json:"secret_key"`
 }
 
 func UserToUserResponse(user model.User) UserResponse {
@@ -55,5 +61,7 @@ func UserToUserResponse(user model.User) UserResponse {
 		UserName:  user.UserName,
 		AvatarURL: user.AvatarURL,
 		UserRole:  user.UserRole,
+		AccessKey: user.AccessKey,
+		SecretKey: user.SecretKey,
 	}
 }

@@ -1,7 +1,6 @@
-package middlewares
+package utils
 
 import "testing"
 
 func TestJwt(t *testing.T) {
-	Use()
 }

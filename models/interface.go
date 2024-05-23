@@ -75,3 +75,8 @@ func InterfaceInfoToInfoResponse(interfaceInfo model.InterfaceInfo) InfoResponse
 		UserID:         interfaceInfo.UserID,
 	}
 }
+
+type InvokeRequest struct {
+	URL    string `json:"url"`    // 接口地址
+	Method string `json:"method"` // 请求类型
+}

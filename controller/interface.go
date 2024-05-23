@@ -18,13 +18,13 @@ type InterfaceInfo interface {
 }
 
 type InterfaceController struct {
-	service *service.Service
+	service *service.Mysql
 	redis   *service.Redis
 }
 
 func NewInterfaceController() InterfaceInfo {
 	return &InterfaceController{
-		service: service.NewService(),
+		service: service.NewMysqlService(),
 		redis:   service.NewRedis(),
 	}
 }
@@ -39,7 +39,13 @@ func (c *InterfaceController) AddInterfaceInfo(ctx *gin.Context) {
 }
 
 func (c *InterfaceController) GetInterfaceDetail(ctx *gin.Context) {
-
+	id := ctx.Param("id")
+	ctx.Keys = map[string]interface{}{
+		"data": gin.H{
+			"message": "pong",
+		},
+	}
+	fmt.Println(id)
 }
 
 func (c *InterfaceController) GetInterfaceList(ctx *gin.Context) {

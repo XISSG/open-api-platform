@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/bwmarrin/snowflake"
 	"log"
 	"math/rand"
@@ -27,4 +29,11 @@ func RandomExpireTime() time.Duration {
 	maxExpire := time.Hour
 	expire := minExpire + time.Duration(rand.Int63n(int64(maxExpire-minExpire)))
 	return expire
+}
+
+func MD5Crypt(plainText string) string {
+	hash := md5.New()
+	hash.Write([]byte(plainText))
+	cypher := hash.Sum([]byte(plainText))
+	return hex.EncodeToString(cypher)
 }

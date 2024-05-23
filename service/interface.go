@@ -1,36 +1,56 @@
 package service
 
 import (
+	"fmt"
 	"github.com/xissg/open-api-platform/dal/model"
 	"github.com/xissg/open-api-platform/dal/query"
 	"github.com/xissg/open-api-platform/models"
+	"gopkg.in/yaml.v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"os"
+	"path/filepath"
 )
 
-type Service struct {
+type Mysql struct {
 	query *query.Query
 }
 
-func initDBConn() (*gorm.DB, error) {
-	dsn := "root:root@tcp(127.0.0.1:3306)/api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	return db, err
+type DbConfig struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	DBName   string `yaml:"db_name"`
 }
 
-func NewService() *Service {
-	db, err := initDBConn()
+func initDBConn() *gorm.DB {
+	var dbConfig DbConfig
+
+	path, _ := os.Getwd()
+	path = filepath.Dir(path)
+	path = filepath.Join(path, "conf", "mysql.yaml")
+	data, err := os.ReadFile(path)
+	err = yaml.Unmarshal(data, &dbConfig)
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.DBName)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
+
+	return db
+}
+
+func NewMysqlService() *Mysql {
+	db := initDBConn()
 	q := query.Use(db)
-	return &Service{
+	return &Mysql{
 		query: q,
 	}
 }
 
 // 创建接口信息
-func (s *Service) CreateInterfaceInfo(values ...*model.InterfaceInfo) error {
+func (s *Mysql) CreateInterfaceInfo(values ...*model.InterfaceInfo) error {
 	tx := s.query.Begin()
 	err := tx.InterfaceInfo.Create(values...)
 	if err != nil {
@@ -41,7 +61,7 @@ func (s *Service) CreateInterfaceInfo(values ...*model.InterfaceInfo) error {
 	return nil
 }
 
-func (s *Service) GetInterfaceInfoById(id int64) (*model.InterfaceInfo, error) {
+func (s *Mysql) GetInterfaceInfoById(id int64) (*model.InterfaceInfo, error) {
 	cond := s.query.InterfaceInfo.ID.Eq(id)
 	alive := s.query.InterfaceInfo.IsDelete.Eq(Normal)
 	result, err := s.query.InterfaceInfo.Where(cond, alive).First()
@@ -52,7 +72,7 @@ func (s *Service) GetInterfaceInfoById(id int64) (*model.InterfaceInfo, error) {
 }
 
 // 分页查询
-func (s *Service) GetInterfaceInfoList(ctx models.QueryInfoRequest) ([]*model.InterfaceInfo, error) {
+func (s *Mysql) GetInterfaceInfoList(ctx models.QueryInfoRequest) ([]*model.InterfaceInfo, error) {
 	offset := (ctx.Page - 1) * ctx.PageSize
 	orderBy := s.query.InterfaceInfo.ID
 	alive := s.query.InterfaceInfo.IsDelete.Eq(Normal)
@@ -63,7 +83,7 @@ func (s *Service) GetInterfaceInfoList(ctx models.QueryInfoRequest) ([]*model.In
 	return results, nil
 }
 
-func (s *Service) UpdateInterfaceInfo(ctx models.UpdateInfoRequest) error {
+func (s *Mysql) UpdateInterfaceInfo(ctx models.UpdateInfoRequest) error {
 	cond := s.query.InterfaceInfo.ID.Eq(ctx.ID)
 	alive := s.query.InterfaceInfo.IsDelete.Eq(Normal)
 	tx := s.query.Begin()
@@ -82,7 +102,7 @@ const (
 	Normal = int32(0)
 )
 
-func (s *Service) DeleteInterfaceInfo(id int64) error {
+func (s *Mysql) DeleteInterfaceInfo(id int64) error {
 	cond := s.query.InterfaceInfo.ID.Eq(id)
 	alive := s.query.InterfaceInfo.IsDelete.Eq(Normal)
 	update := s.query.InterfaceInfo.IsDelete

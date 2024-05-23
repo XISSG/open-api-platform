@@ -20,6 +20,8 @@ type User struct {
 	UpdateTime   time.Time `gorm:"column:update_time;default:CURRENT_TIMESTAMP;comment:更新时间" json:"update_time"` // 更新时间
 	IsDelete     int32     `gorm:"column:is_delete;not null;comment:是否删除,0为不删除，1为删除" json:"is_delete"`           // 是否删除,0为不删除，1为删除
 	UserRole     string    `gorm:"column:user_role;comment:用户类型，有user,admin,ban" json:"user_role"`               // 用户类型，有user,admin,ban
+	AccessKey    string    `gorm:"column:accessKey;comment:本平台的accessKey" json:"accessKey"`                      // 本平台的accessKey
+	SecretKey    string    `gorm:"column:secretKey;comment:本平台的secretKey" json:"secretKey"`                      // 本平台的secretKey
 }
 
 // TableName User's table name
