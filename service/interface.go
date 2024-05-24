@@ -9,7 +9,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"os"
-	"path/filepath"
 )
 
 type Mysql struct {
@@ -27,9 +26,7 @@ type DbConfig struct {
 func initDBConn() *gorm.DB {
 	var dbConfig DbConfig
 
-	path, _ := os.Getwd()
-	path = filepath.Dir(path)
-	path = filepath.Join(path, "conf", "mysql.yaml")
+	path := "./conf/mysql.yaml"
 	data, err := os.ReadFile(path)
 	err = yaml.Unmarshal(data, &dbConfig)
 	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.DBName)
@@ -41,7 +38,7 @@ func initDBConn() *gorm.DB {
 	return db
 }
 
-func NewMysqlService() *Mysql {
+func NewMysql() *Mysql {
 	db := initDBConn()
 	q := query.Use(db)
 	return &Mysql{

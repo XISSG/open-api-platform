@@ -8,9 +8,9 @@ import (
 )
 
 type AddUserRequest struct {
-	UserName     string `json:"user_name" binding:"required, max=256"`
-	AvatarURL    string `json:"avatar_url" binding:"max=1024"`
-	UserPassword string `json:"user_password" binding:"required, max=256"`
+	UserName     string `json:"user_name" validate:"required,max=256"`
+	AvatarURL    string `json:"avatar_url" validate:"max=1024,omitempty"`
+	UserPassword string `json:"user_password" validate:"required,max=256"`
 }
 
 func AddUserRequestToUser(addRequest AddUserRequest) model.User {
@@ -30,20 +30,20 @@ func AddUserRequestToUser(addRequest AddUserRequest) model.User {
 }
 
 type LoginRequest struct {
-	UserName     string `json:"user_name" binding:"required, max=256"`
-	UserPassword string `json:"user_password" binding:"required, max=256"`
+	UserName     string `json:"user_name" validate:"required,max=256"`
+	UserPassword string `json:"user_password" validate:"required,max=256"`
 }
 type QueryUserRequest struct {
-	Page     int `json:"page" binding:"required, max=256"`
-	PageSize int `json:"page_size" binding:"required, max=64"`
+	Page     int `json:"page" validate:"required,max=256"`
+	PageSize int `json:"page_size" validate:"required,max=64"`
 }
 
 type UpdateUserRequest struct {
-	ID           int64  `json:"id" binding:"required, max=64"`
-	UserName     string `json:"user_name" binding:" max=256"`
-	AvatarURL    string `json:"avatar_url" binding:"max=1024"`
-	UserPassword string `json:"user_password" binding:"max=256"`
-	UserRole     string `json:"user_role" binding:"max=16"`
+	ID           int64  `json:"id" validate:"required,max=64"`
+	UserName     string `json:"user_name" validate:"max=256,omitempty"`
+	AvatarURL    string `json:"avatar_url" validate:"max=1024,url,omitempty"`
+	UserPassword string `json:"user_password" validate:"max=256,omitempty"`
+	UserRole     string `json:"user_role" validate:"max=16,omitempty,oneof=admin user"`
 }
 
 type UserResponse struct {

@@ -2,6 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/xissg/open-api-platform/logger"
+	"github.com/xissg/open-api-platform/middlewares"
 	"github.com/xissg/open-api-platform/models"
 	"github.com/xissg/open-api-platform/service"
 	"github.com/xissg/open-api-platform/utils"
@@ -17,26 +20,41 @@ const (
 )
 
 type InvokeController struct {
-	mysql *service.Mysql
-	redis *service.Redis
+	mysql     *service.Mysql
+	redis     *service.Redis
+	validator *validator.Validate
 }
 
-func NewInvokeController() *InvokeController {
+func NewInvokeController(mysql *service.Mysql, redis *service.Redis) *InvokeController {
 	return &InvokeController{
-		mysql: service.NewMysqlService(),
-		redis: service.NewRedis(),
+		mysql:     mysql,
+		redis:     redis,
+		validator: validator.New(),
 	}
 }
 
+// Invoke
+// @Summary Invoke interface
+// @Description Invoke interface
+// @Tags Invoke
+// @Accept json
+// @Produce json
+// @Param invokeRequest body  models.InvokeRequest true "invoke request"
+// @Success 200 {object} middlewares.Response "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /api/invoke [post]
 // 调用次数限制
 func (c *InvokeController) Invoke(ctx *gin.Context) {
 	var request models.InvokeRequest
 	err := ctx.ShouldBindJSON(&request)
+	err = c.validator.Struct(request)
 	if err != nil {
+		logger.SugarLogger.Infof("Data check error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
 		return
 	}
 
-	//TODO:数据校验
 	data, err := c.send(request)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, nil)

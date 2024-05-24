@@ -1,8 +1,13 @@
 package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/go-redis/redis"
+	"github.com/xissg/open-api-platform/dal/model"
+	"github.com/xissg/open-api-platform/logger"
+	"github.com/xissg/open-api-platform/middlewares"
 	"github.com/xissg/open-api-platform/models"
 	"github.com/xissg/open-api-platform/service"
 	"net/http"
@@ -18,61 +23,195 @@ type InterfaceInfo interface {
 }
 
 type InterfaceController struct {
-	service *service.Mysql
-	redis   *service.Redis
+	mysql     *service.Mysql
+	redis     *service.Redis
+	validator *validator.Validate
 }
 
-func NewInterfaceController() InterfaceInfo {
+func NewInterfaceController(mysql *service.Mysql, redis *service.Redis) InterfaceInfo {
 	return &InterfaceController{
-		service: service.NewMysqlService(),
-		redis:   service.NewRedis(),
+		mysql:     mysql,
+		redis:     redis,
+		validator: validator.New(),
 	}
 }
 
+// AddInterfaceInfo
+// @Summary Create interface information
+// @Description Create interface information
+// @Tags Interface information
+// @Accept json
+// @Produce json
+// @Param addRequest body models.AddInfoRequest true "create interface request message"
+// @Success 200 {object} middlewares.Response "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /admin/interface/add_list [post]
 func (c *InterfaceController) AddInterfaceInfo(ctx *gin.Context) {
 	var addRequest models.AddInfoRequest
 	err := ctx.ShouldBindJSON(&addRequest)
+	err = c.validator.Struct(addRequest)
 	if err != nil {
+		logger.SugarLogger.Infof("Data check error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
 		return
 	}
-	ctx.JSON(http.StatusOK, nil)
-}
 
-func (c *InterfaceController) GetInterfaceDetail(ctx *gin.Context) {
-	id := ctx.Param("id")
-	ctx.Keys = map[string]interface{}{
-		"data": gin.H{
-			"message": "pong",
-		},
+	interfaceInfo := models.AddInfoRequestToInterfaceInfo(addRequest)
+	err = c.mysql.CreateInterfaceInfo(&interfaceInfo)
+	if err != nil {
+		logger.SugarLogger.Errorf("Craete interface info error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Create interface info error"))
+		return
 	}
-	fmt.Println(id)
+
+	logger.SugarLogger.Info("Create interface info success")
+	ctx.Set("data", "Create interface info success")
 }
 
+// GetInterfaceDetail
+// @Summary Get interface information by id
+// @Description Get interface information by id
+// @Tags Interface information
+// @Accept json
+// @Produce json
+// @Param id query string true "id"
+// @Success 200 {object} middlewares.Response "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /api/interface_info/get_info/{id} [get]
+func (c *InterfaceController) GetInterfaceDetail(ctx *gin.Context) {
+	//TODO:redis存储逻辑优化
+	str := ctx.Param("id")
+	if str == "" {
+		logger.SugarLogger.Info("Invalid interface id")
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Id is empty"))
+		return
+	}
+	var interfaceInfo *model.InterfaceInfo
+	res, err := c.redis.Get(str)
+	if err != redis.Nil {
+		_ = json.Unmarshal([]byte(res.(string)), &interfaceInfo)
+		logger.SugarLogger.Info("Query successful")
+		ctx.Set("data", interfaceInfo)
+		return
+	}
+
+	id, _ := strconv.ParseInt(str, 10, 64)
+	interfaceInfo, err = c.mysql.GetInterfaceInfoById(id)
+	if err != nil {
+		logger.SugarLogger.Errorf("Query interface info error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Not Found"))
+		return
+	}
+
+	logger.SugarLogger.Info("Query successful")
+	ctx.Set("data", interfaceInfo)
+}
+
+// GetInterfaceList
+// @Summary Get interface information list
+// @Description Get interface information list
+// @Tags Interface information
+// @Accept json
+// @Produce json
+// @Param queryRequest body models.QueryInfoRequest true "get interface request message"
+// @Success 200 {object} []models.InfoResponse "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /api/interface_info/get_list [post]
 func (c *InterfaceController) GetInterfaceList(ctx *gin.Context) {
+	//TODO:redis存储逻辑优化
 	var queryRequest models.QueryInfoRequest
 	err := ctx.ShouldBindJSON(&queryRequest)
+	err = c.validator.Struct(queryRequest)
 	if err != nil {
+		logger.SugarLogger.Infof("Data check error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	//TODO:redis分页查询
+	//start := (queryRequest.Page - 1) * queryRequest.PageSize
+	//end := start + queryRequest.PageSize - 1
+	//c.redis.ZRange()
+	interfaceInfoList, err := c.mysql.GetInterfaceInfoList(queryRequest)
+	if err != nil {
+		logger.SugarLogger.Errorf("Query interface info error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Not Found"))
+		return
+	}
+
+	var results []models.InfoResponse
+	for i := range interfaceInfoList {
+		results = append(results, models.InterfaceInfoToInfoResponse(*interfaceInfoList[i]))
+	}
+
+	logger.SugarLogger.Info("Query successful")
+	ctx.Set("data", results)
 }
 
+// UpdateInterfaceInfo
+// @Summary Update interface information
+// @Description Update interface information
+// @Tags Interface information
+// @Accept json
+// @Produce json
+// @Param updateRequest body models.UpdateInfoRequest true "update interface request message"
+// @Success 200 {object} middlewares.Response "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /admin/interface/update [post]
 func (c *InterfaceController) UpdateInterfaceInfo(ctx *gin.Context) {
+	//TODO:redis存储逻辑优化
 	var updateRequest models.UpdateInfoRequest
 	err := ctx.ShouldBindJSON(&updateRequest)
+	err = c.validator.Struct(updateRequest)
 	if err != nil {
+		logger.SugarLogger.Infof("Data check error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
 		return
 	}
-	ctx.JSON(http.StatusOK, nil)
+
+	err = c.mysql.UpdateInterfaceInfo(updateRequest)
+	if err != nil {
+		logger.SugarLogger.Errorf("Update interface info error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Update interface info error"))
+		return
+	}
+
+	logger.SugarLogger.Info("Update interface info success")
+	ctx.Set("data", "Update interface info success")
 }
 
+// DeleteInterfaceInfo
+// @Summary Delete interface information by id
+// @Description Delete interface information by id
+// @Tags Interface information
+// @Accept json
+// @Produce json
+// @Param id query string true "id"
+// @Success 200 {object} middlewares.Response "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /api/interface_info/get_info/{id} [get]
 func (c *InterfaceController) DeleteInterfaceInfo(ctx *gin.Context) {
+	//TODO:redis存储逻辑优化
 	str := ctx.Param("id")
 	id, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
+		logger.SugarLogger.Info("Invalid interface id")
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Invalid interface id"))
 		return
 	}
-	fmt.Println(id)
-	ctx.JSON(http.StatusOK, nil)
+
+	err = c.mysql.DeleteInterfaceInfo(id)
+	if err != nil {
+		logger.SugarLogger.Errorf("Delete interface info error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Delete interface info error"))
+		return
+	}
+
+	logger.SugarLogger.Info("Delete interface info success")
+	ctx.Set("data", "Delete interface info success")
 }

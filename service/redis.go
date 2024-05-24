@@ -5,7 +5,6 @@ import (
 	"github.com/xissg/open-api-platform/utils"
 	"gopkg.in/yaml.v2"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -21,9 +20,7 @@ type RedisConfig struct {
 }
 
 func initRedis() *redis.Client {
-	path, _ := os.Getwd()
-	path = filepath.Dir(path)
-	path = filepath.Join(path, "conf", "redis.yaml")
+	path := "./conf/redis.yaml"
 	data, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
@@ -61,6 +58,13 @@ func (r *Redis) Delete(key string) error {
 	return r.rdb.Del(key).Err()
 }
 
+func (r *Redis) ZRange(key string, start, stop int64) (interface{}, error) {
+	cmd := r.rdb.ZRange(key, start, stop)
+	if cmd.Err() != nil {
+		return nil, cmd.Err()
+	}
+	return cmd.Result(), nil
+}
 func (r *Redis) Exists(key string) bool {
 	exists, _ := r.rdb.Exists(key).Result()
 	if exists != 1 {
