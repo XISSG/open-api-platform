@@ -71,7 +71,7 @@ func (s *Mysql) GetInterfaceInfoById(id int64) (*model.InterfaceInfo, error) {
 // 分页查询
 func (s *Mysql) GetInterfaceInfoList(ctx models.QueryInfoRequest) ([]*model.InterfaceInfo, error) {
 	offset := (ctx.Page - 1) * ctx.PageSize
-	orderBy := s.query.InterfaceInfo.ID
+	orderBy := s.query.InterfaceInfo.ID.Desc()
 	alive := s.query.InterfaceInfo.IsDelete.Eq(Normal)
 	results, err := s.query.InterfaceInfo.Where(alive).Order(orderBy).Limit(ctx.PageSize).Offset(offset).Find()
 	if err != nil {

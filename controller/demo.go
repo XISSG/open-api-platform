@@ -9,7 +9,5 @@ func NewDemo() *Demo {
 }
 
 func (d *Demo) Hello(ctx *gin.Context) {
-	ctx.JSON(200, gin.H{
-		"message": "hello world",
-	})
+	ctx.Writer.WriteString("Hello World!")
 }

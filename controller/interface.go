@@ -121,7 +121,6 @@ func (c *InterfaceController) GetInterfaceDetail(ctx *gin.Context) {
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
 // @Router /api/interface_info/get_list [post]
 func (c *InterfaceController) GetInterfaceList(ctx *gin.Context) {
-	//TODO:redis存储逻辑优化
 	var queryRequest models.QueryInfoRequest
 	err := ctx.ShouldBindJSON(&queryRequest)
 	err = c.validator.Struct(queryRequest)
@@ -131,10 +130,6 @@ func (c *InterfaceController) GetInterfaceList(ctx *gin.Context) {
 		return
 	}
 
-	//TODO:redis分页查询
-	//start := (queryRequest.Page - 1) * queryRequest.PageSize
-	//end := start + queryRequest.PageSize - 1
-	//c.redis.ZRange()
 	interfaceInfoList, err := c.mysql.GetInterfaceInfoList(queryRequest)
 	if err != nil {
 		logger.SugarLogger.Errorf("Query interface info error %v", err)
@@ -163,7 +158,6 @@ func (c *InterfaceController) GetInterfaceList(ctx *gin.Context) {
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
 // @Router /admin/interface/update [post]
 func (c *InterfaceController) UpdateInterfaceInfo(ctx *gin.Context) {
-	//TODO:redis存储逻辑优化
 	var updateRequest models.UpdateInfoRequest
 	err := ctx.ShouldBindJSON(&updateRequest)
 	err = c.validator.Struct(updateRequest)
@@ -174,6 +168,7 @@ func (c *InterfaceController) UpdateInterfaceInfo(ctx *gin.Context) {
 	}
 
 	err = c.mysql.UpdateInterfaceInfo(updateRequest)
+	err = c.redis.Delete(strconv.FormatInt(updateRequest.ID, 10))
 	if err != nil {
 		logger.SugarLogger.Errorf("Update interface info error %v", err)
 		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Update interface info error"))
@@ -196,7 +191,6 @@ func (c *InterfaceController) UpdateInterfaceInfo(ctx *gin.Context) {
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
 // @Router /api/interface_info/get_info/{id} [get]
 func (c *InterfaceController) DeleteInterfaceInfo(ctx *gin.Context) {
-	//TODO:redis存储逻辑优化
 	str := ctx.Param("id")
 	id, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
@@ -206,6 +200,7 @@ func (c *InterfaceController) DeleteInterfaceInfo(ctx *gin.Context) {
 	}
 
 	err = c.mysql.DeleteInterfaceInfo(id)
+	err = c.redis.Delete(strconv.FormatInt(id, 10))
 	if err != nil {
 		logger.SugarLogger.Errorf("Delete interface info error %v", err)
 		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Delete interface info error"))

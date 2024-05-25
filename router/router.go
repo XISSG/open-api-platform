@@ -11,6 +11,14 @@ import (
 
 func Router(router *gin.Engine) {
 
+	//用于测试接口是否能够调用成功
+	demoController := controller.NewDemo()
+	invokeAPI := router.Group("/demo")
+	invokeAPI.Use(middlewares.InvokeAuth())
+	{
+		invokeAPI.GET("/", demoController.Hello)
+	}
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	//全局中间件
@@ -58,11 +66,4 @@ func Router(router *gin.Engine) {
 		invoke.POST("/", invokeController.Invoke)
 	}
 
-	//用于测试接口是否能够调用成功
-	demoController := controller.NewDemo()
-	invokeAPI := router.Group("/demo")
-	invokeAPI.Use(middlewares.InvokeAuth())
-	{
-		invokeAPI.POST("/", demoController.Hello)
-	}
 }

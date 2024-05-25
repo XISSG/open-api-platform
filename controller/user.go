@@ -111,7 +111,8 @@ func (c *UserController) Login(ctx *gin.Context) {
 
 	tokenString, _ := utils.GenerateJWT(user.UserName, user.UserRole, utils.JWTExpireTime.Unix(), []byte(utils.SecretJWTKey))
 	logger.SugarLogger.Infof("Login success")
-	ctx.Set("data", tokenString)
+	res := map[string]string{"token": tokenString, "accessKey": user.AccessKey, "secretKey": user.SecretKey}
+	ctx.Set("data", res)
 }
 
 // GetUserByName

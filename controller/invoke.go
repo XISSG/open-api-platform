@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	AccessKey = "access_key"
-	SecretKey = "secret_key"
+	AccessKey = "e51d9c31e3ac0065ebe3f1ee6261c817"
+	SecretKey = "864a73225dc963b4ecd72acdab2c8e501472926e75c56b4fe8816dcd7852f0d2"
 )
 
 type InvokeController struct {
@@ -61,7 +61,7 @@ func (c *InvokeController) Invoke(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Set("data", data)
+	ctx.Writer.Write(data)
 }
 
 func (c *InvokeController) send(request models.InvokeRequest) ([]byte, error) {

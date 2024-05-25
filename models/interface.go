@@ -77,6 +77,6 @@ func InterfaceInfoToInfoResponse(interfaceInfo model.InterfaceInfo) InfoResponse
 }
 
 type InvokeRequest struct {
-	URL    string `json:"url" validate:"required,url"`                 // 接口地址
-	Method string `json:"method" validate:"oneof=GET POST PUT DELETE"` // 请求类型
+	URL    string `json:"url" validate:"required,url"`                          // 接口地址
+	Method string `json:"method" validate:"required,oneof=GET POST PUT DELETE"` // 请求类型
 }

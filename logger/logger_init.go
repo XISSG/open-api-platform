@@ -9,19 +9,12 @@ import (
 var Logger *zap.Logger
 var SugarLogger *zap.SugaredLogger
 
-type loggerConfig struct {
-	encoder      zapcore.Encoder
-	writerSyncer zapcore.WriteSyncer
-	levelEnable  zapcore.Level
-}
-
 func InitLogger() {
 	core := zapcore.NewCore(
 		getEncoder(),
 		zapcore.NewMultiWriteSyncer(
 			getWriterSyncer(),
 			zapcore.AddSync(os.Stdout),
-			zapcore.AddSync(os.Stderr),
 		),
 		getLevelEnable(),
 	)

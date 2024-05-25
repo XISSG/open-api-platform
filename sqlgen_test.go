@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestSqlgen(t *testing.T) {
+func TestSqlGen(t *testing.T) {
 	g := gen.NewGenerator(gen.Config{
 		OutPath: "dal/query",
 		Mode:    gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,

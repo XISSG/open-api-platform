@@ -12,7 +12,7 @@ const (
 	BUCKET_SIZE   = 2
 )
 
-// 限速逻辑，https://pkg.go.dev/golang.org/x/time/rate
+// RateLimit 限速逻辑，https://pkg.go.dev/golang.org/x/time/rate
 func RateLimit() gin.HandlerFunc {
 
 	return func(c *gin.Context) {

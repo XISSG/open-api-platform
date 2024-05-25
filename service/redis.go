@@ -5,10 +5,8 @@ import (
 	"github.com/xissg/open-api-platform/utils"
 	"gopkg.in/yaml.v2"
 	"os"
-	"time"
 )
 
-// redis仅读取和删除，不更新，
 type Redis struct {
 	rdb *redis.Client
 }
@@ -56,27 +54,4 @@ func (r *Redis) Set(key string, value interface{}) error {
 
 func (r *Redis) Delete(key string) error {
 	return r.rdb.Del(key).Err()
-}
-
-func (r *Redis) ZRange(key string, start, stop int64) (interface{}, error) {
-	cmd := r.rdb.ZRange(key, start, stop)
-	if cmd.Err() != nil {
-		return nil, cmd.Err()
-	}
-	return cmd.Result(), nil
-}
-func (r *Redis) Exists(key string) bool {
-	exists, _ := r.rdb.Exists(key).Result()
-	if exists != 1 {
-		return false
-	}
-	return true
-}
-
-func (r *Redis) Expire(key string, expireTime time.Duration) error {
-	return r.rdb.Expire(key, expireTime).Err()
-}
-
-func (r *Redis) Incr(key string) {
-	r.rdb.Incr(key)
 }
