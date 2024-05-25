@@ -1,0 +1,534 @@
+definitions:
+  middlewares.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  models.AddInfoRequest:
+    properties:
+      description:
+        description: 描述
+        maxLength: 256
+        type: string
+      method:
+        description: 请求类型
+        type: string
+      name:
+        description: 名称
+        maxLength: 256
+        type: string
+      request_header:
+        description: 请求头
+        maxLength: 8192
+        type: string
+      response_header:
+        description: 响应头
+        maxLength: 8192
+        type: string
+      status:
+        description: 接口状态(0-关闭， 1-开启)
+        type: integer
+      url:
+        description: 接口地址
+        type: string
+      user_id:
+        description: 创建人
+        type: integer
+    required:
+    - method
+    - status
+    - url
+    - user_id
+    type: object
+  models.AddUserRequest:
+    properties:
+      avatar_url:
+        maxLength: 1024
+        type: string
+      user_name:
+        type: string
+      user_password:
+        type: string
+    required:
+    - user_name
+    - user_password
+    type: object
+  models.InfoResponse:
+    properties:
+      description:
+        description: 描述
+        type: string
+      id:
+        description: 主键
+        type: integer
+      method:
+        description: 请求类型
+        type: string
+      name:
+        description: 名称
+        type: string
+      request_header:
+        description: 请求头
+        type: string
+      response_header:
+        description: 响应头
+        type: string
+      status:
+        description: 接口状态(0-关闭， 1-开启)
+        type: integer
+      url:
+        description: 接口地址
+        type: string
+      user_id:
+        description: 创建人
+        type: integer
+    type: object
+  models.InvokeRequest:
+    properties:
+      method:
+        description: 请求类型
+        type: string
+      url:
+        description: 接口地址
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      user_name:
+        type: string
+      user_password:
+        type: string
+    required:
+    - user_name
+    - user_password
+    type: object
+  models.QueryInfoRequest:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+    required:
+    - page
+    - page_size
+    type: object
+  models.QueryUserRequest:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+    required:
+    - page
+    - page_size
+    type: object
+  models.UpdateInfoRequest:
+    properties:
+      description:
+        description: 描述
+        maxLength: 256
+        type: string
+      id:
+        type: integer
+      method:
+        description: 请求类型
+        maxLength: 256
+        type: string
+      name:
+        description: 名称
+        maxLength: 256
+        type: string
+      request_header:
+        description: 请求头
+        maxLength: 8192
+        type: string
+      response_header:
+        description: 响应头
+        maxLength: 8192
+        type: string
+      status:
+        description: 接口状态(0-关闭， 1-开启)
+        maximum: 10
+        type: integer
+      url:
+        description: 接口地址
+        maxLength: 512
+        type: string
+      user_id:
+        description: 创建人
+        maximum: 64
+        type: integer
+    required:
+    - id
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      avatar_url:
+        maxLength: 1024
+        type: string
+      id:
+        type: integer
+      user_name:
+        type: string
+      user_password:
+        maxLength: 256
+        type: string
+      user_role:
+        maxLength: 16
+        type: string
+    required:
+    - id
+    type: object
+  models.UserResponse:
+    properties:
+      access_key:
+        type: string
+      avatar_url:
+        type: string
+      id:
+        type: integer
+      secret_key:
+        type: string
+      user_name:
+        type: string
+      user_role:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /admin/interface/add_list:
+    post:
+      consumes:
+      - application/json
+      description: Create interface information
+      parameters:
+      - description: create interface request message
+        in: body
+        name: addRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Create interface information
+      tags:
+      - Interface information
+  /admin/interface/update:
+    post:
+      consumes:
+      - application/json
+      description: Update interface information
+      parameters:
+      - description: update interface request message
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Update interface information
+      tags:
+      - Interface information
+  /admin/user/delete/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by name
+      parameters:
+      - description: user id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Get user by name
+      tags:
+      - User
+  /admin/user/get_info/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by name
+      parameters:
+      - description: username
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Get user by name
+      tags:
+      - User
+  /admin/user/get_list:
+    post:
+      consumes:
+      - application/json
+      description: Get user list
+      parameters:
+      - description: query user request message
+        in: body
+        name: queryRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.QueryUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Get user list
+      tags:
+      - User
+  /admin/user/update_info:
+    post:
+      consumes:
+      - application/json
+      description: Update user information
+      parameters:
+      - description: update user request message
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Update
+      tags:
+      - User
+  /api/interface_info/get_info/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Delete interface information by id
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Delete interface information by id
+      tags:
+      - Interface information
+  /api/interface_info/get_list:
+    post:
+      consumes:
+      - application/json
+      description: Get interface information list
+      parameters:
+      - description: get interface request message
+        in: body
+        name: queryRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.QueryInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            items:
+              $ref: '#/definitions/models.InfoResponse'
+            type: array
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Get interface information list
+      tags:
+      - Interface information
+  /api/invoke:
+    post:
+      consumes:
+      - application/json
+      description: Invoke interface
+      parameters:
+      - description: invoke request
+        in: body
+        name: invokeRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.InvokeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Invoke interface
+      tags:
+      - Invoke
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: login user request message
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tokenString
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Login
+      tags:
+      - User
+  /api/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a user
+      parameters:
+      - description: create user request message
+        in: body
+        name: addRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middlewares.Response'
+      summary: Create a user
+      tags:
+      - User
+swagger: "2.0"

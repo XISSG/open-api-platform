@@ -1,0 +1,50 @@
+POST http://localhost:8082/invoke
+Content-Type: application/json
+
+{
+  "method": "GET",
+  "url": "http://localhost:8082/demo"
+}
+
+###
+# curl -X 'POST'
+#  'http://localhost:8082/api/user/register'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "avatar_url": "string",
+#  "user_name": "xissg",
+#  "user_password": "12345678"
+#}'
+POST http://localhost:8082/api/user/login
+accept: application/json
+Content-Type: application/json
+
+{
+  "user_name": "xissg",
+  "user_password": "12345678"
+}
+
+###
+# curl -X 'POST'
+#  'http://localhost:8082/api/interface_info/get_list'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "page": 0,
+#  "page_size": 0
+#}'
+POST http://localhost:8082/api/interface_info/get_list
+accept: application/json
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyIiwiZXhwIjoxNzE2NjAxMTkyLCJqdGkiOiJ4aXNzZyJ9.rr_9no1jjefpfG8VTuxm3rQcrvaKQ7vKTeQKF_ZZ3p4
+
+
+{
+  "page": 0,
+  "page_size": 0
+}
+
+###
+
+
