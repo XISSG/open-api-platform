@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/xissg/open-api-platform/constant"
 	"github.com/xissg/open-api-platform/logger"
 	"github.com/xissg/open-api-platform/service"
 	"github.com/xissg/open-api-platform/utils"
@@ -11,9 +12,9 @@ import (
 // API调用认证中间件
 func InvokeAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		accessKey := ctx.GetHeader("X-Access-Key")
-		signature := ctx.GetHeader("X-Signature")
-		timestamp := ctx.GetHeader("X-Timestamp")
+		accessKey := ctx.GetHeader(constant.AUTH_ACCESS_KEY)
+		signature := ctx.GetHeader(constant.AUTH_ACCESS_SIGNATURE)
+		timestamp := ctx.GetHeader(constant.AUTH_ACCESS_TIMESTAMP)
 		if accessKey == "" || signature == "" || timestamp == "" {
 			logger.SugarLogger.Infof("Invalid access key")
 			ctx.JSON(401, ErrorResponse(401, "Invalid access"))

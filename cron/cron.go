@@ -2,40 +2,33 @@ package cron
 
 import (
 	"encoding/json"
+	"github.com/go-redis/redis"
 	"github.com/xissg/open-api-platform/dal/model"
+	"github.com/xissg/open-api-platform/logger"
 	"github.com/xissg/open-api-platform/models"
 	"github.com/xissg/open-api-platform/service"
-	"strconv"
 	"time"
 )
 
-type Fn func() error
+type Fn func()
 
 type Cron struct {
 	ticker *time.Ticker //定时器
 	runner Fn           //处理函数
 }
 
-func NewCron(timeDuration time.Duration, fn Fn) *Cron {
-	//设置默认处理函数
-	if fn == nil {
-		fn = defaultHandlerFunc
-	}
-
-	return &Cron{
-		ticker: time.NewTicker(timeDuration),
-		runner: fn,
-	}
-}
-
 func (c *Cron) Start() error {
 	for {
 		select {
 		case <-c.ticker.C:
-			if err := c.runner(); err != nil {
-				return err
-			}
+			c.runner()
+
 		}
+		defer func() {
+			if err := recover(); err != nil {
+				logger.SugarLogger.Panic(err)
+			}
+		}()
 	}
 }
 
@@ -67,19 +60,33 @@ func defaultHandlerFunc() error {
 
 	for i := range interfaceInfo {
 		data, _ := json.Marshal(interfaceInfo[i])
-		_ = redisClient.Set(strconv.FormatInt(interfaceInfo[i].ID, 10), data)
+		_ = redisClient.ZAdd("interfaceInfo", redis.Z{
+			Score:  float64(interfaceInfo[i].ID),
+			Member: string(data),
+		})
 	}
 
 	return nil
 }
 
-func StartCron() {
-	go func() {
-		cron := NewCron(time.Hour*24, defaultHandlerFunc)
-		err := cron.Start()
-		if err != nil {
-			return
-		}
-		defer cron.Stop()
-	}()
+type Option func(*Cron)
+
+func WithDuration(duration time.Duration) Option {
+	return func(c *Cron) {
+		c.ticker = time.NewTicker(duration)
+	}
+}
+
+func WithHandlerFunc(handlerFunc Fn) Option {
+	return func(c *Cron) {
+		c.runner = handlerFunc
+	}
+}
+
+func New(options ...Option) *Cron {
+	cron := &Cron{}
+	for _, option := range options {
+		option(cron)
+	}
+	return cron
 }

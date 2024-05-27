@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/xissg/open-api-platform/constant"
 	"github.com/xissg/open-api-platform/logger"
 	"net/http"
 )
@@ -50,7 +51,7 @@ func ResponseMiddleware() gin.HandlerFunc {
 			c.JSON(c.Writer.Status(), ErrorResponse(c.Writer.Status(), c.Errors.ByType(gin.ErrorTypePrivate).String()))
 		} else {
 			// 返回成功响应
-			c.JSON(http.StatusOK, SuccessResponse(c.Keys["data"]))
+			c.JSON(http.StatusOK, SuccessResponse(c.Keys[constant.RESPONSE_DATA_KEY]))
 		}
 	}
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/xissg/open-api-platform/cron"
 	"github.com/xissg/open-api-platform/docs"
 	"github.com/xissg/open-api-platform/logger"
 	"github.com/xissg/open-api-platform/router"
@@ -13,8 +12,6 @@ func main() {
 
 	initDocs()
 	logger.InitLogger()
-	cron.StartCron()
-
 	r := gin.New()
 	router.Router(r)
 	_ = r.Run(":8082")

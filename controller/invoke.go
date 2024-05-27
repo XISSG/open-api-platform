@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/xissg/open-api-platform/constant"
 	"github.com/xissg/open-api-platform/logger"
 	"github.com/xissg/open-api-platform/middlewares"
 	"github.com/xissg/open-api-platform/models"
@@ -12,11 +14,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-)
-
-const (
-	AccessKey = "e51d9c31e3ac0065ebe3f1ee6261c817"
-	SecretKey = "864a73225dc963b4ecd72acdab2c8e501472926e75c56b4fe8816dcd7852f0d2"
 )
 
 type InvokeController struct {
@@ -73,13 +70,14 @@ func (c *InvokeController) send(request models.InvokeRequest) ([]byte, error) {
 		return nil, err
 	}
 
+	user, err := c.mysql.GetUserByName(constant.Admin)
 	//生成签名
 	timestamp := time.Now().Unix()
-	signature := utils.GenerateSignature(SecretKey, timestamp)
+	signature := utils.GenerateSignature(user.SecretKey, timestamp)
 
-	req.Header.Set("X-Access-Key", AccessKey)
-	req.Header.Set("X-Signature", signature)
-	req.Header.Set("X-TimeStamp", strconv.FormatInt(timestamp, 10))
+	req.Header.Set(constant.AUTH_ACCESS_KEY, user.AccessKey)
+	req.Header.Set(constant.AUTH_ACCESS_SIGNATURE, signature)
+	req.Header.Set(constant.AUTH_ACCESS_TIMESTAMP, strconv.FormatInt(timestamp, 10))
 
 	response, err := client.Do(req)
 	if err != nil {
@@ -88,4 +86,45 @@ func (c *InvokeController) send(request models.InvokeRequest) ([]byte, error) {
 	data, _ := io.ReadAll(response.Body)
 
 	return data, nil
+}
+
+// GetInvokeStatus
+// @Summary Get invoke information
+// @Description Get invoke information
+// @Tags Invoke
+// @Accept json
+// @Produce json
+// @Param invokeRequest body  models.GetInvokeRequest true "invoke request"
+// @Success 200 {object} middlewares.Response "ok"
+// @Failure 400 {object} middlewares.Response "bad request"
+// @Failure 500 {object} middlewares.Response "Internal Server Error"
+// @Router /admin/invoke_info/status [post]
+func (c *InvokeController) GetInvokeStatus(ctx *gin.Context) {
+	var request models.GetInvokeRequest
+	err := ctx.ShouldBindJSON(&request)
+	err = c.validator.Struct(request)
+	if err != nil {
+		logger.SugarLogger.Infof("Data check error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
+		return
+	}
+
+	stats, err := c.getAPIStats(request.Method, request.Path)
+	if err != nil {
+		logger.SugarLogger.Errorf("Get API stats error %v", err)
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Get API stats error"))
+		return
+	}
+
+	if stats == nil {
+		logger.SugarLogger.Errorf("API Status Not Found")
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "API Status Not Found"))
+		return
+	}
+	ctx.Set(constant.RESPONSE_DATA_KEY, stats)
+}
+
+func (c *InvokeController) getAPIStats(method, path string) (map[string]string, error) {
+	key := fmt.Sprintf("api_stats:%s:%s", method, path)
+	return c.redis.HGetAll(key)
 }

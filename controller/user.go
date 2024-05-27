@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/xissg/open-api-platform/constant"
 	"github.com/xissg/open-api-platform/logger"
 	"github.com/xissg/open-api-platform/middlewares"
 	"github.com/xissg/open-api-platform/models"
@@ -54,7 +55,16 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	if c.mysql.IsUserExist(addRequest.UserName) {
+	if addRequest.AvatarURL != "" {
+		err = c.validator.Var(addRequest.AvatarURL, "url")
+		if err != nil {
+			logger.SugarLogger.Infof("Data check error %v", err)
+			ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Invalid url"))
+			return
+		}
+	}
+
+	if res, _ := c.mysql.GetUserByName(addRequest.UserName); res != nil {
 		logger.SugarLogger.Infof("User already exist!")
 		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "User already exist!"))
 		return
@@ -70,7 +80,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 	}
 
 	logger.SugarLogger.Info("Register user success")
-	ctx.Set("data", "Register user success")
+	ctx.Set(constant.RESPONSE_DATA_KEY, "Register user success")
 }
 
 // Login
@@ -112,7 +122,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 	tokenString, _ := utils.GenerateJWT(user.UserName, user.UserRole, utils.JWTExpireTime.Unix(), []byte(utils.SecretJWTKey))
 	logger.SugarLogger.Infof("Login success")
 	res := map[string]string{"token": tokenString, "accessKey": user.AccessKey, "secretKey": user.SecretKey}
-	ctx.Set("data", res)
+	ctx.Set(constant.RESPONSE_DATA_KEY, res)
 }
 
 // GetUserByName
@@ -149,7 +159,7 @@ func (c *UserController) GetUserByName(ctx *gin.Context) {
 
 	responseUser := models.UserToUserResponse(*user)
 	logger.SugarLogger.Info("Get user success")
-	ctx.Set("data", responseUser)
+	ctx.Set(constant.RESPONSE_DATA_KEY, responseUser)
 }
 
 // GetUserList
@@ -192,7 +202,7 @@ func (c *UserController) GetUserList(ctx *gin.Context) {
 	}
 
 	logger.SugarLogger.Info("Get user success")
-	ctx.Set("data", responseList)
+	ctx.Set(constant.RESPONSE_DATA_KEY, responseList)
 }
 
 // UpdateUserInfo
@@ -209,11 +219,36 @@ func (c *UserController) GetUserList(ctx *gin.Context) {
 func (c *UserController) UpdateUserInfo(ctx *gin.Context) {
 	var updateRequest models.UpdateUserRequest
 	err := ctx.ShouldBindJSON(&updateRequest)
+
 	err = c.validator.Struct(updateRequest)
 	if err != nil {
 		logger.SugarLogger.Infof("Data check error %v", err)
 		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
 		return
+	}
+
+	if updateRequest.ID <= 0 || len(strconv.FormatInt(updateRequest.ID, 10)) > 256 {
+		logger.SugarLogger.Infof("Authentication failed")
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Invalid id"))
+		return
+	}
+
+	if updateRequest.AvatarURL != "" {
+		err = c.validator.Var(updateRequest.AvatarURL, "url")
+		if err != nil {
+			logger.SugarLogger.Infof("Data check error %v", err)
+			ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Invalid url"))
+			return
+		}
+	}
+
+	if updateRequest.UserRole != "" {
+		err = c.validator.Var(updateRequest.UserRole, "onepf=user admin")
+		if err != nil {
+			logger.SugarLogger.Infof("Data check error %v", err)
+			ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Invalid role"))
+			return
+		}
 	}
 
 	err = c.mysql.UpdateUser(updateRequest)
@@ -224,12 +259,12 @@ func (c *UserController) UpdateUserInfo(ctx *gin.Context) {
 	}
 
 	logger.SugarLogger.Info("Update user success")
-	ctx.Set("data", "Update user success")
+	ctx.Set(constant.RESPONSE_DATA_KEY, "Update user success")
 }
 
 // DeleteUserInfo
-// @Summary Get user by name
-// @Description Get user by name
+// @Summary Get user by id
+// @Description Get user by id
 // @Tags User
 // @Accept json
 // @Produce json
@@ -241,9 +276,15 @@ func (c *UserController) UpdateUserInfo(ctx *gin.Context) {
 func (c *UserController) DeleteUserInfo(ctx *gin.Context) {
 	str := ctx.Param("id")
 	id, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
+	if len(str) > 256 || id <= 0 || err != nil {
 		logger.SugarLogger.Infof("Data format error: %v", err)
 		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Data format error"))
+		return
+	}
+
+	if res, _ := c.mysql.GetUserById(id); res == nil {
+		logger.SugarLogger.Infof("User not find")
+		ctx.JSON(http.StatusBadRequest, middlewares.ErrorResponse(http.StatusBadRequest, "Not Found"))
 		return
 	}
 
@@ -255,5 +296,5 @@ func (c *UserController) DeleteUserInfo(ctx *gin.Context) {
 	}
 
 	logger.SugarLogger.Info("Delete user success")
-	ctx.Set("data", "Delete user success")
+	ctx.Set(constant.RESPONSE_DATA_KEY, "Delete user success")
 }

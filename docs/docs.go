@@ -62,6 +62,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/interface/delete/{id}": {
+            "get": {
+                "description": "Delete interface information by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Interface information"
+                ],
+                "summary": "Delete interface information by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/interface/update": {
             "post": {
                 "description": "Update interface information",
@@ -108,9 +152,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/invoke_info/status": {
+            "post": {
+                "description": "Get invoke information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoke"
+                ],
+                "summary": "Get invoke information",
+                "parameters": [
+                    {
+                        "description": "invoke request",
+                        "name": "invokeRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.GetInvokeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/user/delete/{id}": {
             "get": {
-                "description": "Get user by name",
+                "description": "Get user by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -120,7 +210,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get user by name",
+                "summary": "Get user by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -293,7 +383,7 @@ const docTemplate = `{
         },
         "/api/interface_info/get_info/{id}": {
             "get": {
-                "description": "Delete interface information by id",
+                "description": "Get interface information by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -303,7 +393,7 @@ const docTemplate = `{
                 "tags": [
                     "Interface information"
                 ],
-                "summary": "Delete interface information by id",
+                "summary": "Get interface information by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -541,8 +631,7 @@ const docTemplate = `{
             "required": [
                 "method",
                 "status",
-                "url",
-                "user_id"
+                "url"
             ],
             "properties": {
                 "description": {
@@ -552,7 +641,14 @@ const docTemplate = `{
                 },
                 "method": {
                     "description": "请求类型",
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 256,
+                    "enum": [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE"
+                    ]
                 },
                 "name": {
                     "description": "名称",
@@ -571,11 +667,17 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "接口状态(0-关闭， 1-开启)",
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 10,
+                    "enum": [
+                        0,
+                        1
+                    ]
                 },
                 "url": {
                     "description": "接口地址",
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 512
                 },
                 "user_id": {
                     "description": "创建人",
@@ -595,9 +697,34 @@ const docTemplate = `{
                     "maxLength": 1024
                 },
                 "user_name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 256
                 },
                 "user_password": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        },
+        "models.GetInvokeRequest": {
+            "type": "object",
+            "required": [
+                "method",
+                "path"
+            ],
+            "properties": {
+                "method": {
+                    "description": "请求类型",
+                    "type": "string",
+                    "enum": [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE"
+                    ]
+                },
+                "path": {
+                    "description": "接口地址",
                     "type": "string"
                 }
             }
@@ -645,10 +772,20 @@ const docTemplate = `{
         },
         "models.InvokeRequest": {
             "type": "object",
+            "required": [
+                "method",
+                "url"
+            ],
             "properties": {
                 "method": {
                     "description": "请求类型",
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE"
+                    ]
                 },
                 "url": {
                     "description": "接口地址",
@@ -664,10 +801,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "user_name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 256
                 },
                 "user_password": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 256
                 }
             }
         },
@@ -679,10 +818,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "page": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 256
                 },
                 "page_size": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 64
                 }
             }
         },
@@ -694,10 +835,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "page": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 256
                 },
                 "page_size": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 64
                 }
             }
         },
@@ -747,8 +890,7 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "description": "创建人",
-                    "type": "integer",
-                    "maximum": 64
+                    "type": "integer"
                 }
             }
         },
@@ -766,7 +908,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 256
                 },
                 "user_password": {
                     "type": "string",
