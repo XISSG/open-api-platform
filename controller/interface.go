@@ -81,7 +81,7 @@ func (c *InterfaceController) AddInterfaceInfo(ctx *gin.Context) {
 // @Success 200 {object} middlewares.Response "ok"
 // @Failure 400 {object} middlewares.Response "bad request"
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
-// @Router /api/interface_info/get_info/{id} [get]
+// @Router /api/interface_info/get_info/:id [get]
 func (c *InterfaceController) GetInterfaceDetail(ctx *gin.Context) {
 	str := ctx.Param("id")
 	if str == "" {
@@ -227,7 +227,7 @@ func (c *InterfaceController) UpdateInterfaceInfo(ctx *gin.Context) {
 // @Success 200 {object} middlewares.Response "ok"
 // @Failure 400 {object} middlewares.Response "bad request"
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
-// @Router /admin/interface/delete/{id} [get]
+// @Router /admin/interface/delete/:id [get]
 func (c *InterfaceController) DeleteInterfaceInfo(ctx *gin.Context) {
 	str := ctx.Param("id")
 	id, err := strconv.ParseInt(str, 10, 64)

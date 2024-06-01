@@ -135,7 +135,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 // @Success 200 {object} models.UserResponse "ok"
 // @Failure 400 {object} middlewares.Response "bad request"
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
-// @Router /admin/user/get_info/{name} [get]
+// @Router /admin/user/get_info/:name [get]
 func (c *UserController) GetUserByName(ctx *gin.Context) {
 	name := ctx.Param("name")
 	if name == "" || len(name) > 256 {
@@ -272,7 +272,7 @@ func (c *UserController) UpdateUserInfo(ctx *gin.Context) {
 // @Success 200 {object} middlewares.Response "ok"
 // @Failure 400 {object} middlewares.Response "bad request"
 // @Failure 500 {object} middlewares.Response "Internal Server Error"
-// @Router /admin/user/delete/{id} [get]
+// @Router /admin/user/delete/:id [get]
 func (c *UserController) DeleteUserInfo(ctx *gin.Context) {
 	str := ctx.Param("id")
 	id, err := strconv.ParseInt(str, 10, 64)
