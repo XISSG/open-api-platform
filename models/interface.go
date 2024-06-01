@@ -7,14 +7,14 @@ import (
 )
 
 type AddInfoRequest struct {
-	Name           string `json:"name" validate:"max=256,omitempty"`                                      // 名称
-	Description    string `json:"description" validate:"max=256,omitempty"`                               // 描述
-	URL            string `json:"url" validate:"required,max=512,url"`                                    // 接口地址
-	RequestHeader  string `json:"request_header" validate:"max=8192,omitempty"`                           // 请求头
-	ResponseHeader string `json:"response_header" validate:"max=8192,omitempty"`                          // 响应头
-	Status         int32  `json:"status" validate:"required,max=10,oneof=0 1,omitempty"`                  // 接口状态(0-关闭， 1-开启)
-	Method         string `json:"method" validate:"required,max=256,oneof=GET POST PUT DELETE,omitempty"` // 请求类型
-	UserID         int64  `json:"user_id" validate:"required,max=64,omitempty"`                           // 创建人
+	Name           string `json:"name" validate:"max=256,omitempty"`                            // 名称
+	Description    string `json:"description" validate:"max=256,omitempty"`                     // 描述
+	URL            string `json:"url" validate:"required,max=512,url"`                          // 接口地址
+	RequestHeader  string `json:"request_header" validate:"max=8192,omitempty"`                 // 请求头
+	ResponseHeader string `json:"response_header" validate:"max=8192,omitempty"`                // 响应头
+	Status         int32  `json:"status" validate:"required,max=10,oneof=0 1"`                  // 接口状态(0-关闭， 1-开启)
+	Method         string `json:"method" validate:"required,max=256,oneof=GET POST PUT DELETE"` // 请求类型
+	UserID         int64  `json:"user_id" validate:"omitempty"`                                 // 创建人
 }
 
 func AddInfoRequestToInterfaceInfo(addRequest AddInfoRequest) model.InterfaceInfo {
@@ -39,15 +39,15 @@ type QueryInfoRequest struct {
 }
 
 type UpdateInfoRequest struct {
-	ID             int64  `json:"id" validate:"required,max=64"`
-	Name           string `json:"name" validate:"max=256,omitempty"`                             // 名称
-	Description    string `json:"description" validate:"max=256,omitempty"`                      // 描述
-	URL            string `json:"url" validate:"max=512,url,omitempty"`                          // 接口地址
-	RequestHeader  string `json:"request_header" validate:"max=8192,omitempty"`                  // 请求头
-	ResponseHeader string `json:"response_header" validate:"max=8192,omitempty"`                 // 响应头
-	Status         int32  `json:"status" validate:"max=10,oneof=0 1,omitempty"`                  // 接口状态(0-关闭， 1-开启)
-	Method         string `json:"method" validate:"max=256,oneof=GET POST PUT DELETE,omitempty"` // 请求类型
-	UserID         int64  `json:"user_id" validate:"max=64,omitempty"`                           // 创建人
+	ID             int64  `json:"id" validate:"required"`
+	Name           string `json:"name" validate:"max=256,omitempty"`             // 名称
+	Description    string `json:"description" validate:"max=256,omitempty"`      // 描述
+	URL            string `json:"url" validate:"max=512,omitempty"`              // 接口地址
+	RequestHeader  string `json:"request_header" validate:"max=8192,omitempty"`  // 请求头
+	ResponseHeader string `json:"response_header" validate:"max=8192,omitempty"` // 响应头
+	Status         int32  `json:"status" validate:"max=10,omitempty"`            // 接口状态(0-关闭， 1-开启)
+	Method         string `json:"method" validate:"max=256"`                     // 请求类型
+	UserID         int64  `json:"user_id" validate:"omitempty"`                  // 创建人
 }
 
 type InfoResponse struct {
@@ -78,5 +78,10 @@ func InterfaceInfoToInfoResponse(interfaceInfo model.InterfaceInfo) InfoResponse
 
 type InvokeRequest struct {
 	URL    string `json:"url" validate:"required,url"`                          // 接口地址
+	Method string `json:"method" validate:"required,oneof=GET POST PUT DELETE"` // 请求类型
+}
+
+type GetInvokeRequest struct {
+	Path   string `json:"path" validate:"required"`                             // 接口地址
 	Method string `json:"method" validate:"required,oneof=GET POST PUT DELETE"` // 请求类型
 }

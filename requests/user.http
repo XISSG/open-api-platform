@@ -45,6 +45,154 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyIiwiZXhwIjox
   "page_size": 0
 }
 
+
 ###
+POST http://localhost:8082/admin/user/get_list
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjY5MTQyNCwianRpIjoieGlzc2cifQ.T2y9g2Ikcb3qLgiFRgTrhMXgzFiNTjnTi0I-2uAnYgg
+
+{
+  "page": 1,
+  "page_size": 10
+}
+
+###
+
+# curl -X 'POST'
+#  'http://localhost:8082/admin/user/update_info'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "avatar_url": "demo",
+#  "id": 1794409666252378112,
+#  "user_name": "demo",
+#  "user_password": "demo",
+#  "user_role": "admin"
+#}'
+POST http://localhost:8082/admin/user/update_info
+accept: application/json
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjY5MTQyNCwianRpIjoieGlzc2cifQ.T2y9g2Ikcb3qLgiFRgTrhMXgzFiNTjnTi0I-2uAnYgg
+
+{
+  "id": 1794409666252378112,
+  "user_name": "demo",
+  "user_password": "demo",
+  "user_role": "admin",
+  "avatar_url": "http://localhost:8082/"
+}
+
+###
+GET http://localhost:8082/admin/user/delete/1794409666252378112
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjY5MTQyNCwianRpIjoieGlzc2cifQ.T2y9g2Ikcb3qLgiFRgTrhMXgzFiNTjnTi0I-2uAnYgg
+
+
+###
+
+# curl -X 'POST'
+#  'http://localhost:8082/admin/interface/add_list'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "description": "string",
+#  "method": "GET",
+#  "name": "string",
+#  "request_header": "string",
+#  "response_header": "string",
+#  "status": 0,
+#  "url": "string",
+#  "user_id": 0
+#}'
+POST http://localhost:8082/admin/interface/add_list
+accept: application/json
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjc1MjY5OCwianRpIjoieGlzc2cifQ.VfTxs54Xry1_YrH1KqkXp9N6AZ8cPnE01k3uIRzMviI
+
+{
+  "description": "test api interface",
+  "method": "GET",
+  "name": "test",
+  "status": 1,
+  "url": "http://localhost:8082/hello"
+}
+
+###
+# curl -X 'POST'
+#  'http://localhost:8082/api/interface_info/get_list'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "page": 256,
+#  "page_size": 64
+#}'
+POST http://localhost:8082/api/interface_info/get_list
+accept: application/json
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjgyMzk0MCwianRpIjoieGlzc2cifQ.TkGt9FDgWx-eE3dBVH1Ef2OimEYPGthbiNGob1DkS8o
+
+{
+  "page": 1,
+  "page_size": 64
+}
+
+###
+# curl -X 'POST'
+#  'http://localhost:8082/admin/interface/update'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "description": "string",
+#  "id": 0,
+#  "method": "string",
+#  "name": "string",
+#  "request_header": "string",
+#  "response_header": "string",
+#  "status": 10,
+#  "url": "string",
+#  "user_id": 0
+#}'
+POST http://localhost:8082/admin/interface/update
+accept: application/json
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjc1MjY5OCwianRpIjoieGlzc2cifQ.VfTxs54Xry1_YrH1KqkXp9N6AZ8cPnE01k3uIRzMviI
+
+{
+  "description": "test api",
+  "id": 1794667530971779072,
+  "method": "POST",
+  "name": "string",
+  "status": 0,
+  "user_id": 0
+}
+
+###
+GET http://localhost:8082/admin/interface/delete/1794667530971779072
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjc1MjY5OCwianRpIjoieGlzc2cifQ.VfTxs54Xry1_YrH1KqkXp9N6AZ8cPnE01k3uIRzMviI
+
+
+###
+
+# curl -X 'POST'
+#  'http://localhost:8082/admin/invoke_info/status'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "method": "GET",
+#  "path": "/api/user/login"
+#}'
+POST http://localhost:8082/admin/invoke_info/status
+accept: application/json
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTcxNjc1MjY5OCwianRpIjoieGlzc2cifQ.VfTxs54Xry1_YrH1KqkXp9N6AZ8cPnE01k3uIRzMviI
+
+{
+  "method": "POST",
+  "path": "/api/user/login"
+}
+
+###
+
 
 

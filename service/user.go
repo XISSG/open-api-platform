@@ -86,16 +86,3 @@ func (s *Mysql) DeleteUser(id int64) error {
 	_ = tx.Commit()
 	return nil
 }
-
-func (s *Mysql) IsUserExist(name string) bool {
-	user, err := s.GetUserByName(name)
-	if err != nil {
-		return false
-	}
-
-	if user != nil {
-		return true
-	}
-
-	return false
-}

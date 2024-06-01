@@ -39,11 +39,11 @@ type QueryUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	ID           int64  `json:"id" validate:"required,max=64"`
+	ID           int64  `json:"id" validate:"required"`
 	UserName     string `json:"user_name" validate:"max=256,omitempty"`
-	AvatarURL    string `json:"avatar_url" validate:"max=1024,url,omitempty"`
+	AvatarURL    string `json:"avatar_url" validate:"max=1024,omitempty"`
 	UserPassword string `json:"user_password" validate:"max=256,omitempty"`
-	UserRole     string `json:"user_role" validate:"max=16,omitempty,oneof=admin user"`
+	UserRole     string `json:"user_role" validate:"max=16,omitempty"`
 }
 
 type UserResponse struct {
